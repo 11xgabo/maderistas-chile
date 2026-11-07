@@ -21,6 +21,7 @@
 body {
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100svh;
   margin: 0;
 }
 
@@ -33,6 +34,7 @@ button {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100svh;
   padding: 0 24px 24px;
   background: #121212;
 }
@@ -532,7 +534,9 @@ button {
 
 @media (max-width: 560px) {
   .game-page {
-    padding: 0 14px 14px;
+    min-height: 100vh;
+    min-height: 100svh;
+    padding: 0 14px calc(58px + env(safe-area-inset-bottom));
   }
 
   .site-header {
@@ -540,7 +544,14 @@ button {
   }
 
   .site-footer {
+    position: fixed;
+    z-index: 10;
+    right: 0;
+    bottom: calc(var(--visual-viewport-bottom-gap, 0px) + env(safe-area-inset-bottom));
+    left: 0;
+    width: 100%;
     min-height: 44px;
+    background: #121212;
   }
 
   .site-footer__brand {

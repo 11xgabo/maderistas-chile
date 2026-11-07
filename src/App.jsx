@@ -131,6 +131,34 @@ function App() {
   const musicRef = useRef(null);
 
   useEffect(() => {
+    const root = document.documentElement;
+    const viewport = window.visualViewport;
+
+    function updateVisibleViewport() {
+      if (!viewport) return;
+      const bottomGap = Math.max(
+        0,
+        window.innerHeight - viewport.height - viewport.offsetTop,
+      );
+      root.style.setProperty('--visual-viewport-height', `${viewport.height}px`);
+      root.style.setProperty('--visual-viewport-bottom-gap', `${bottomGap}px`);
+    }
+
+    updateVisibleViewport();
+    viewport?.addEventListener('resize', updateVisibleViewport);
+    viewport?.addEventListener('scroll', updateVisibleViewport);
+    window.addEventListener('resize', updateVisibleViewport);
+
+    return () => {
+      viewport?.removeEventListener('resize', updateVisibleViewport);
+      viewport?.removeEventListener('scroll', updateVisibleViewport);
+      window.removeEventListener('resize', updateVisibleViewport);
+      root.style.removeProperty('--visual-viewport-height');
+      root.style.removeProperty('--visual-viewport-bottom-gap');
+    };
+  }, []);
+
+  useEffect(() => {
     if (!helpOpen && !musicOpen) return undefined;
 
     function handlePointerDown(event) {
