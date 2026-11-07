@@ -570,8 +570,7 @@ button {
   }
 
   .game-page > .merge10 {
-    width: 100%;
-    transform: translateY(-10vh);
+    width: min(100%, max(200px, calc(var(--visual-viewport-height, 100dvh) - 380px)));
   }
 
   .help-widget {
