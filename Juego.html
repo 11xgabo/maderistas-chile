@@ -1,0 +1,367 @@
+<div class="contenedor-juego-2048">
+    <div class="score-container-2048">
+        <div class="title-2048">Merge 10</div>
+        <div class="score-box-2048">PUNTOS<br><span id="score-val">0</span></div>
+    </div>
+    
+    <div id="board-2048">
+        <!-- Rejilla de fondo fija (los 16 cuadrados de tu imagen) -->
+        <div class="grid-bg-2048"></div><div class="grid-bg-2048"></div><div class="grid-bg-2048"></div><div class="grid-bg-2048"></div>
+        <div class="grid-bg-2048"></div><div class="grid-bg-2048"></div><div class="grid-bg-2048"></div><div class="grid-bg-2048"></div>
+        <div class="grid-bg-2048"></div><div class="grid-bg-2048"></div><div class="grid-bg-2048"></div><div class="grid-bg-2048"></div>
+        <div class="grid-bg-2048"></div><div class="grid-bg-2048"></div><div class="grid-bg-2048"></div><div class="grid-bg-2048"></div>
+        
+        <!-- Capa donde se mueven y cargan tus imágenes -->
+        <div id="tiles-layer-2048"></div>
+
+        <!-- Pantalla de Fin de Juego (Muestra la ficha más alta conseguida) -->
+        <div id="game-over-screen" class="overlay-screen-2048">
+            <div class="status-text-2048">¡Fin del Juego!</div>
+            <div class="subtext-2048">Tu ficha más alta conseguida:</div>
+            <div class="preview-tile-container">
+                <img id="highest-tile-img" src="" alt="Ficha más alta">
+            </div>
+            <button class="action-btn-2048" onclick="window.reiniciarJuego2048()">Intentar de nuevo</button>
+        </div>
+
+        <!-- Pantalla de Victoria (Al combinar dos fichas de nivel 10) -->
+        <div id="win-screen" class="overlay-screen-2048" style="background: rgba(237, 194, 46, 0.85);">
+            <div class="status-text-2048" style="color: white;">¡Felicidades!</div>
+            <div class="subtext-2048" style="color: white; font-weight: bold;">¡Has completado el juego!</div>
+            <div class="preview-tile-container" style="width: 120px; height: 120px; margin: 15px auto;">
+                <img id="win-special-img" src="" alt="Imagen de Victoria">
+            </div>
+            <button class="action-btn-2048" style="background: #ffffff; color: #776e65;" onclick="window.reiniciarJuego2048()">Jugar otra vez</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* --- ESTILOS DE DISEÑO Y ANIMACIÓN --- */
+.contenedor-juego-2048 {
+    width: min(340px, calc(100% - 24px));
+    box-sizing: border-box;
+    margin: 20px auto;
+    font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+    background-color: #faf8ef;
+    padding: clamp(10px, 4vw, 15px);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    user-select: none;
+    -webkit-user-select: none;
+}
+.score-container-2048 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.title-2048 {
+    font-size: clamp(26px, 8vw, 34px);
+    font-weight: bold;
+    color: #776e65;
+}
+.score-box-2048 {
+    background: #bbada0;
+    color: white;
+    padding: 6px clamp(10px, 4vw, 18px);
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 11px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+#score-val { font-size: 18px; }
+#board-2048 {
+    width: 100%;
+    aspect-ratio: 1;
+    background-color: #776e65;
+    border-radius: 8px;
+    position: relative;
+    padding: 3.125%;
+    box-sizing: border-box;
+    touch-action: none;
+    overflow: hidden;
+}
+.grid-bg-2048 {
+    width: 20.625%;
+    height: 20.625%;
+    background-color: #9e948a;
+    border-radius: 5px;
+    float: left;
+    margin: 1.25%;
+}
+.tile-2048 {
+    width: 20.625%;
+    height: 20.625%;
+    border-radius: 5px;
+    position: absolute;
+    transition: all 0.1s ease-in-out;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #eee5db;
+    animation: aparecerFicha 0.15s ease-out;
+}
+.tile-2048 img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.overlay-screen-2048 {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(238, 228, 218, 0.85);
+    border-radius: 8px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    animation: fundidoEntrada 0.3s ease-in-out;
+}
+.status-text-2048 {
+    font-size: clamp(24px, 8vw, 34px);
+    font-weight: bold;
+    color: #776e65;
+    margin-bottom: 5px;
+}
+.subtext-2048 {
+    font-size: 13px;
+    color: #8f8274;
+    text-align: center;
+}
+.preview-tile-container {
+    width: 74px;
+    height: 74px;
+    margin: 10px auto 15px auto;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    background-color: #eee5db;
+}
+.preview-tile-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.action-btn-2048 {
+    background: #8f7a66;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.1s;
+}
+.action-btn-2048:hover { background: #7f6a56; }
+@media (max-width: 360px) {
+    .score-container-2048 { margin-bottom: 10px; }
+    .score-box-2048 { font-size: 10px; }
+}
+@keyframes aparecerFicha {
+    from { opacity: 0; transform: scale(0.7); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes fundidoEntrada {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+</style>
+<script>
+/* --- CONFIGURACIÓN DE TUS IMÁGENES --- */
+const RUTA_IMAGENES = {
+    1: "images/1.jpg",
+    2: "images/2.jpg",
+    3: "images/3.jfif",
+    4: "images/4.webp",
+    5: "images/5.jfif",
+    6: "images/6.jfif",
+    7: "images/7.jfif",
+    8: "images/8.jfif",
+    9: "images/9.jfif",
+    10: "images/10.jfif"
+};
+
+const IMAGEN_VICTORIA_ESPECIAL = "images/win.png";
+
+(function() {
+    const size = 4;
+    let matrix = Array(size).fill().map(() => Array(size).fill(0));
+    let score = 0;
+    let juegoActivo = true;
+
+    function init() {
+        matrix = Array(size).fill().map(() => Array(size).fill(0));
+        score = 0;
+        juegoActivo = true;
+        document.getElementById('game-over-screen').style.display = 'none';
+        document.getElementById('win-screen').style.display = 'none';
+        spawn();
+        spawn();
+        render();
+    }
+    window.reiniciarJuego2048 = init;
+
+    function spawn() {
+        let empty = [];
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                if (matrix[r][c] === 0) empty.push({r, c});
+            }
+        }
+        if (empty.length > 0) {
+            let space = empty[Math.floor(Math.random() * empty.length)];
+            matrix[space.r][space.c] = Math.random() < 0.9 ? 1 : 2;
+        }
+    }
+
+    function render() {
+        const layer = document.getElementById('tiles-layer-2048');
+        layer.innerHTML = '';
+        let fichaMaxima = 1;
+        
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                if (matrix[r][c] > 0) {
+                    let nivel = matrix[r][c];
+                    if (nivel > fichaMaxima) fichaMaxima = nivel;
+
+                    let tile = document.createElement('div');
+                    tile.className = `tile-2048`;
+                    
+                    let img = document.createElement('img');
+                    img.src = RUTA_IMAGENES[nivel] || "";
+                    img.alt = `Ficha ${nivel}`;
+                    tile.appendChild(img);
+                    
+                    tile.style.top = `calc(3.125% + ${r * 23.125}%)`;
+                    tile.style.left = `calc(3.125% + ${c * 23.125}%)`;
+                    layer.appendChild(tile);
+                }
+            }
+        }
+        document.getElementById('score-val').innerText = score;
+        
+        if (!checkMovesAvailable()) {
+            juegoActivo = false;
+            document.getElementById('highest-tile-img').src = RUTA_IMAGENES[fichaMaxima] || "";
+            document.getElementById('game-over-screen').style.display = 'flex';
+        }
+    }
+
+    function checkMovesAvailable() {
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                if (matrix[r][c] === 0) return true;
+            }
+        }
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size - 1; c++) {
+                if (matrix[r][c] === matrix[r][c + 1]) return true;
+            }
+        }
+        for (let c = 0; c < size; c++) {
+            for (let r = 0; r < size - 1; r++) {
+                if (matrix[r][c] === matrix[r + 1][c]) return true;
+            }
+        }
+        return false;
+    }
+
+    function compress(row) {
+        let clean = row.filter(val => val);
+        for (let i = 0; i < clean.length - 1; i++) {
+            if (clean[i] === clean[i + 1]) {
+                clean[i] += 1;
+                score += clean[i] * 10;
+                clean[i + 1] = 0;
+
+                if (clean[i] === 11) {
+                    juegoActivo = false;
+                    setTimeout(() => {
+                        document.getElementById('win-special-img').src = IMAGEN_VICTORIA_ESPECIAL;
+                        document.getElementById('win-screen').style.display = 'flex';
+                    }, 200);
+                }
+            }
+        }
+        clean = clean.filter(val => val);
+        while (clean.length < size) clean.push(0);
+        return clean;
+    }
+
+    function left() { for (let r = 0; r < size; r++) matrix[r] = compress(matrix[r]); }
+    function right() {
+        for (let r = 0; r < size; r++) {
+            matrix[r].reverse();
+            matrix[r] = compress(matrix[r]);
+            matrix[r].reverse();
+        }
+    }
+    function transpose() {
+        let next = Array(size).fill().map(() => Array(size).fill(0));
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) next[c][r] = matrix[r][c];
+        }
+        matrix = next;
+    }
+
+    function move(direction) {
+        if (!juegoActivo) return;
+        let before = JSON.stringify(matrix);
+        if (direction === 'left')  left();
+        if (direction === 'right') right();
+        if (direction === 'up')    { transpose(); left(); transpose(); }
+        if (direction === 'down')  { transpose(); right(); transpose(); }
+
+        if (before !== JSON.stringify(matrix)) {
+            spawn();
+            render();
+        }
+    }
+
+    window.addEventListener('keydown', (e) => {
+        const directions = {
+            ArrowLeft: 'left',
+            ArrowRight: 'right',
+            ArrowUp: 'up',
+            ArrowDown: 'down'
+        };
+        const direction = directions[e.key];
+        if (!direction) return;
+        e.preventDefault();
+        move(direction);
+    });
+
+    const board = document.getElementById('board-2048');
+    let pointerStart = null;
+    board.addEventListener('pointerdown', (e) => {
+        if (!juegoActivo) return;
+        pointerStart = { x: e.clientX, y: e.clientY, pointerId: e.pointerId };
+        board.setPointerCapture(e.pointerId);
+    });
+    board.addEventListener('pointerup', (e) => {
+        if (!pointerStart || pointerStart.pointerId !== e.pointerId) return;
+        const deltaX = e.clientX - pointerStart.x;
+        const deltaY = e.clientY - pointerStart.y;
+        pointerStart = null;
+        if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 24) return;
+        move(Math.abs(deltaX) > Math.abs(deltaY)
+            ? (deltaX > 0 ? 'right' : 'left')
+            : (deltaY > 0 ? 'down' : 'up'));
+    });
+    board.addEventListener('pointercancel', () => { pointerStart = null; });
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+})();
+</script>
